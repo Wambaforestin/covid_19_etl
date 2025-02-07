@@ -1,7 +1,8 @@
 import pandas as pd
 from .base_transformer import BaseTransformer
 from src.utils.logger import setup_logger
-
+import os
+import config
 logger = setup_logger('aggregator')
 
 class DataAggregator(BaseTransformer):
@@ -44,6 +45,10 @@ class DataAggregator(BaseTransformer):
            logger.info(f"Nombre de lignes agrégées: {len(aggregated)}")
            logger.info(f"Nombre de pays uniques: {aggregated['id_pays'].nunique()}")
            logger.info(f"Nombre de maladies uniques: {aggregated['id_maladie'].nunique()}")
+           
+           # Sauvegarde intermédiaire
+           aggregated.to_csv(os.path.join(config.DATA_PATHS['processed'], 
+                         'aggregated_data.csv'), index=False)
            
            return aggregated
 

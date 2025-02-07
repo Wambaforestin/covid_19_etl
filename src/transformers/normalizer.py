@@ -1,6 +1,8 @@
 import pandas as pd
 from .base_transformer import BaseTransformer
 from src.utils.logger import setup_logger
+import os
+import config
 
 logger = setup_logger('normalizer')
 
@@ -19,7 +21,10 @@ class DataNormalizer(BaseTransformer):
             numeric_columns = ['cas_confirmes', 'deces', 'guerisons', 'cas_actifs']
             for col in numeric_columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype(int)
-            
+                
+             # Sauvegarde intermédiaire
+            df.to_csv(os.path.join(config.DATA_PATHS['processed'], 
+                 'normalized_data.csv'), index=False)
             return df
 
         except Exception as e:

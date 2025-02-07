@@ -1,6 +1,8 @@
 import pandas as pd
 from .base_transformer import BaseTransformer
 from src.utils.logger import setup_logger
+import os
+import config
 
 logger = setup_logger('cleaner')
 
@@ -42,6 +44,10 @@ class DataCleaner(BaseTransformer):
            df[text_columns] = df[text_columns].fillna('Non renseigné')
 
            logger.info(f"Nettoyage terminé. Lignes restantes: {len(df)}")
+           
+           df.to_csv(os.path.join(config.DATA_PATHS['processed'], 
+                 'cleaned_data.csv'), index=False)
+           
            return df
 
        except Exception as e:
