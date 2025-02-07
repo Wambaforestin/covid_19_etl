@@ -1,0 +1,39 @@
+# Environnement virtuel
+etlenv/
+etlenv*/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+*.egg
+
+# Logs
+logs/
+*.log
+
+# Données
+data/processed/*
+!data/processed/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+
+# Environnement
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Cache
+.cache/
