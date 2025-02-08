@@ -1,6 +1,7 @@
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(project_root)
 
 from src.config import Config
 from src.config.database import db_manager
@@ -30,6 +31,10 @@ class ETLPipeline:
     def initialize_reference_data(self):
         try:
             with self.db_manager.get_session() as session:
+                # Vérifier si COVID-19 existe déjà
+                existing_covid = session.query(Maladie).filter_by(nom_maladie='COVID-19').first()
+            
+            if not existing_covid:
                 covid = Maladie(
                     nom_maladie='COVID-19',
                     type_maladie='Virale',
@@ -38,6 +43,8 @@ class ETLPipeline:
                 session.add(covid)
                 session.commit()
                 logger.info("Données de référence initialisées")
+            else:
+                logger.info("Les données de référence existent déjà")
         except Exception as e:
             logger.error(f"Erreur initialisation données: {str(e)}")
             raise
