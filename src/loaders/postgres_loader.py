@@ -24,9 +24,23 @@ class PostgresLoader:
             logger.error(f"Erreur chargement {table_name}: {str(e)}")
             raise
 
-    def load_reference_data(self, pays_df: pd.DataFrame, maladie_df: pd.DataFrame):
-        self.bulk_insert('pays', pays_df, if_exists='replace')
-        self.bulk_insert('maladie', maladie_df, if_exists='replace')
-
-    def load_situation_data(self, situation_df: pd.DataFrame):
-        self.bulk_insert('situation_pandemique', situation_df, if_exists='append')
+    def load_situation_data(self, df: pd.DataFrame):
+        try:
+            # Vérifier que nous avons les bonnes colonnes
+            required_columns = ['id_pays', 'id_maladie', 'date_observation', 
+                              'cas_confirmes', 'deces', 'guerisons', 'cas_actifs',
+                              'nouveaux_cas', 'nouveaux_deces', 'nouvelles_guerisons']
+            
+            if not all(col in df.columns for col in required_columns):
+                logger.error(f"Colonnes manquantes. Attendues: {required_columns}")
+                logger.error(f"Reçues: {df.columns.tolist()}")
+                raise ValueError("Colonnes manquantes pour situation_pandemique")
+            
+            # Ne sélectionner que les colonnes nécessaires dans le bon ordre
+            situation_df = df[required_columns]
+            
+            self.bulk_insert('situation_pandemique', situation_df, if_exists='append')
+            
+        except Exception as e:
+            logger.error(f"Erreur chargement situation_pandemique: {str(e)}")
+            raise

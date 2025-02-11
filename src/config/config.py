@@ -1,10 +1,11 @@
 import os
 from dotenv import load_dotenv
-from pathlib import Path
 
+# Charger les variables d'environnement
 load_dotenv()
 
 class Config:
+    # Configuration Base de données
     DB_CONFIG = {
         'host': os.getenv('DB_HOST', 'localhost'),
         'port': int(os.getenv('DB_PORT', 5432)),
@@ -13,20 +14,24 @@ class Config:
         'password': os.getenv('DB_PASSWORD')
     }
 
-    BASE_DIR = Path(__file__).parent.parent.parent
+    # Configuration des chemins
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     DATA_PATHS = {
-        'raw': BASE_DIR / 'data' / 'raw',
-        'processed': BASE_DIR / 'data' / 'processed',
-        'intermediate': BASE_DIR / 'data' / 'processed' / 'intermediate'
+        'raw': os.path.join(BASE_DIR, 'data', 'raw'),
+        'processed': os.path.join(BASE_DIR, 'data', 'processed'),
+        'intermediate': os.path.join(BASE_DIR, 'data', 'processed', 'intermediate')
     }
 
-    # Création des dossiers
-    for path in DATA_PATHS.values():
-        path.mkdir(parents=True, exist_ok=True)
+    def __init__(self):
+        # Création des dossiers nécessaires
+        for path in self.DATA_PATHS.values():
+            os.makedirs(path, exist_ok=True)
 
-    DATA_SOURCES = {
-        'covid19': DATA_PATHS['raw'] / 'covid19_global_cases.csv',
-    }
+    @property
+    def DATA_SOURCES(self):
+        return {
+            'covid19': os.path.join(self.DATA_PATHS['raw'], 'covid19_global_cases.csv')
+        }
 
     @property
     def DATABASE_URL(self):
