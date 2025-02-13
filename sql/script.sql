@@ -36,3 +36,4 @@ CREATE TABLE situation_pandemique (
 CREATE INDEX idx_situation_date ON situation_pandemique(date_observation);
 CREATE INDEX idx_situation_pays ON situation_pandemique(id_pays);
 CREATE INDEX idx_situation_maladie ON situation_pandemique(id_maladie);
+
