@@ -1,3 +1,9 @@
+/* 
+    Script de création de la base de données
+    Ce script crée les tables nécessaires pour stocker les données sur les pays, les maladies et les situations pandémiques
+*/
+
+
 -- Table PAYS
 CREATE TABLE pays (
     id_pays SERIAL PRIMARY KEY,
