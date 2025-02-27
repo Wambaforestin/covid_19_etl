@@ -70,11 +70,6 @@ class DataNormalizer(BaseTransformer):
        logger.info(f"Nombre de pays uniques: {df['nom_pays'].nunique()}")
        logger.info(f"Plage de dates: {df['date_observation'].min()} à {df['date_observation'].max()}")
        
-       # Sauvegarde des données normalisées
-       output_path = os.path.join(config.DATA_PATHS['processed'], 'normalized_data.csv')
-       df.to_csv(output_path, index=False)
-       logger.info(f"Données normalisées sauvegardées: {output_path}")
-       
        return df
        
    except Exception as e:
