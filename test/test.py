@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import pandas as pd
 from src.transformers.aggregator import DataAggregator
 from src.transformers.cleaner import DataCleaner
@@ -6,8 +6,8 @@ from src.transformers.normalizer import DataNormalizer
 from src.loaders.postgres_loader import PostgresLoader
 from unittest.mock import patch, MagicMock
 
-class TestDataAggregator(unittest.TestCase):
-    def setUp(self):
+class TestDataAggregator:
+    def setup_method(self):
         self.aggregator = DataAggregator()
         self.df = pd.DataFrame({
             'nom_pays': ['Country1', 'Country2'],
@@ -27,12 +27,12 @@ class TestDataAggregator(unittest.TestCase):
 
     def test_transform(self):
         result = self.aggregator.transform(self.df, self.pays_df)
-        self.assertEqual(len(result), 2)
-        self.assertIn('id_pays', result.columns)
-        self.assertIn('id_maladie', result.columns)
+        assert len(result) == 2
+        assert 'id_pays' in result.columns
+        assert 'id_maladie' in result.columns
 
-class TestDataCleaner(unittest.TestCase):
-    def setUp(self):
+class TestDataCleaner:
+    def setup_method(self):
         self.cleaner = DataCleaner()
         self.df = pd.DataFrame({
             'col1': [1, 2, None, 4],
@@ -42,12 +42,12 @@ class TestDataCleaner(unittest.TestCase):
 
     def test_transform(self):
         result = self.cleaner.transform(self.df)
-        self.assertEqual(len(result), 3)
-        self.assertNotIn(None, result['col1'])
-        self.assertNotIn(None, result['col2'])
+        assert len(result) == 3
+        assert None not in result['col1'].tolist()
+        assert None not in result['col2'].tolist()
 
-class TestDataNormalizer(unittest.TestCase):
-    def setUp(self):
+class TestDataNormalizer:
+    def setup_method(self):
         self.normalizer = DataNormalizer()
         self.df = pd.DataFrame({
             'Country/Region': ['Country1', 'Country2'],
@@ -64,11 +64,11 @@ class TestDataNormalizer(unittest.TestCase):
 
     def test_transform(self):
         result = self.normalizer.transform(self.df)
-        self.assertIn('nom_pays', result.columns)
-        self.assertIn('cas_confirmes', result.columns)
-        self.assertIn('date_observation', result.columns)
+        assert 'nom_pays' in result.columns
+        assert 'cas_confirmes' in result.columns
+        assert 'date_observation' in result.columns
 
-class TestPostgresLoader(unittest.TestCase):
+class TestPostgresLoader:
     @patch('src.config.db_manager.get_session')
     def test_bulk_insert(self, mock_get_session):
         loader = PostgresLoader()
@@ -88,6 +88,3 @@ class TestPostgresLoader(unittest.TestCase):
         mock_get_session.return_value.__enter__.return_value = mock_session
         loader.bulk_insert('situation_pandemique', df)
         mock_session.connection().execute.assert_called()
-
-if __name__ == '__main__':
-    unittest.main()
