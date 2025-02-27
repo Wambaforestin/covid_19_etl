@@ -93,3 +93,5 @@ class TestPostgresLoader:
 
         # Ensure bulk insert is called correctly
         assert mock_session.connection().execute.called or mock_session.add_all.called
+        
+        
