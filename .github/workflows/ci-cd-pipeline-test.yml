@@ -30,7 +30,9 @@ jobs:
       # Étape 4 : Exécution des tests
       - name: Run tests
         id: tests  # Donne un ID à cette étape pour récupérer le résultat plus tard
-        run: pytest tests/test.py
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/src
+          pytest tests/test.py
 
       # Étape 5 : Envoi d'un e-mail avec les résultats des tests
       - name: Send email notification
