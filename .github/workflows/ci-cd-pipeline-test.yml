@@ -1,0 +1,50 @@
+name: CI/CD Pipeline for ETL (Test uniquement)
+
+on:
+  push:
+    branches:
+      - master  # Déclenche le workflow à chaque push sur la branche master
+
+jobs:
+  test-and-notify:
+    runs-on: ubuntu-latest  # Utilise une machine virtuelle Ubuntu
+
+    steps:
+      # Étape 1 : Checkout du code
+      - name: Checkout code
+        uses: actions/checkout@v2  # Récupère le code du dépôt
+
+      # Étape 2 : Configuration de Python
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12.0'
+
+      # Étape 3 : Installation des dépendances
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip  # Met à jour pip
+          pip install -r requirements.txt  # Installe les dépendances du projet
+          pip install pytest  # Installe pytest pour les tests
+
+      # Étape 4 : Exécution des tests
+      - name: Run tests
+        id: tests  # Donne un ID à cette étape pour récupérer le résultat plus tard
+        run: pytest  # Exécute tous les tests dans le dossier
+
+      # Étape 5 : Envoi d'un e-mail avec les résultats des tests
+      - name: Send email notification
+        if: always()  # Exécute cette étape même si les tests échouent
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com  # Serveur SMTP (exemple pour Gmail)
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}  # Ton adresse e-mail (configurée dans les secrets GitHub)
+          password: ${{ secrets.EMAIL_PASSWORD }}  # Ton mot de passe ou token d'application (dans les secrets GitHub)
+          subject: "Résultats des tests du pipeline ETL"
+          body: |
+            Les tests du pipeline ETL ont été exécutés.
+            Résultat : ${{ steps.tests.outcome }}
+            Voir les détails ici : ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: ${{ secrets.TEAM_EMAILS }}  # Liste des adresses e-mail de l'équipe (configurée dans les secrets GitHub)
+          from: ${{ secrets.EMAIL_USERNAME }}  # Expéditeur
