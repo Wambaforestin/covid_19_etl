@@ -102,6 +102,7 @@ class TestDataNormalizer:
         assert 'date_observation' in result.columns
 
 
+
 # Test de la classe PostgresLoader
 # class TestPostgresLoader:
 #     @patch('pandas.DataFrame.to_sql')
