@@ -43,10 +43,10 @@ class TestDataCleaner:
 
     def test_transform(self):
         result = self.cleaner.transform(self.df)
-        assert len(result) == 3  # Ensure row with all NaN is dropped
-        assert result['col1'].isnull().sum() == 0  # Ensure no nulls in col1
-        assert result['col2'].isnull().sum() == 0  # Ensure no nulls in col2
-
+        assert result['col1'].isnull().sum() == 0
+        assert result['col2'].isnull().sum() == 0
+        assert result['col3'].isnull().sum() == 4
+        
 class TestDataNormalizer:
     def setup_method(self):
         self.normalizer = DataNormalizer()

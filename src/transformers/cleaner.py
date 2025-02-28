@@ -12,9 +12,12 @@ class DataCleaner(BaseTransformer):
             
             processed_dir = Path(__file__).parent.parent.parent / 'data' / 'processed'
             processed_dir.mkdir(parents=True, exist_ok=True)
+            # Supprimer les lignes où toutes les colonnes numériques sont à zéro
+            numeric_columns = ['Confirmed', 'Deaths', 'Recovered', 'Active', 'New cases', 'New deaths', 'New recovered']
+            df = df.drop(df[(df[numeric_columns] == 0).all(axis=1)].index)
+            logger.info(f"Lignes avec toutes les valeurs numériques à zéro supprimées: {len(df)} lignes restantes")
 
-            # Nettoyage...
-             # 1. Supprimer les lignes avec plus de 50% de valeurs manquantes
+            # 1. Supprimer les lignes avec plus de 50% de valeurs manquantes
             df = df.dropna(thresh=len(df.columns) * 0.5)
 
            # 2. Nettoyage par type de colonne

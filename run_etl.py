@@ -26,11 +26,6 @@ class ETLPipeline:
        self.normalizer = DataNormalizer()
        self.aggregator = DataAggregator()
 
-   def save_intermediate(self, df, stage):
-       output_path = os.path.join(config.DATA_PATHS['intermediate'], f"{stage}_data.csv")
-       df.to_csv(output_path, index=False)
-       logger.info(f"Données intermédiaires sauvegardées: {output_path}")
-
    def initialize_pays(self, df):
     """Initialise la table pays avec normalisation des noms"""
     try:
