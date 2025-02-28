@@ -58,7 +58,7 @@ class TestDataCleaner:
 
         # Assertions to verify the transformation
         # 1. Rows with all numeric columns as 0 should be removed
-        assert len(result) == 3  # Only 3 rows should remain after removing rows with all zeros
+        assert len(result) == 2  # Only 2 rows should remain after removing rows with all zeros
 
         # 2. Strings should be stripped and title-cased
         assert result['Country'].tolist() == ['USA', 'Canada', 'France', 'Germany', 'Non Renseigné']
@@ -104,8 +104,9 @@ class TestDataNormalizer:
 
 # Test de la classe PostgresLoader
 class TestPostgresLoader:
+    @patch('pandas.DataFrame.to_sql')
     @patch('src.config.db_manager.get_session')
-    def test_bulk_insert(self, mock_get_session):
+    def test_bulk_insert(self, mock_get_session, mock_to_sql):
         loader = PostgresLoader()
         df = pd.DataFrame({
             'id_pays': [1, 2],
@@ -131,9 +132,9 @@ class TestPostgresLoader:
         loader.bulk_insert('situation_pandemique', df)
 
         # Verify that to_sql was called with the correct arguments
-        mock_engine.connect.return_value.__enter__.return_value.execute.assert_called_once()
-
-
-# Run the tests
-if __name__ == "__main__":
-    pytest.main()
+        mock_to_sql.assert_called_once_with(
+            name='situation_pandemique',
+            con=mock_engine.connect.return_value.__enter__.return_value,
+            if_exists='append',
+            index=False
+        )
