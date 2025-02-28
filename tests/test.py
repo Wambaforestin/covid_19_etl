@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import pandas as pd
 from src.transformers.aggregator import DataAggregator
@@ -6,6 +7,7 @@ from src.transformers.normalizer import DataNormalizer
 from src.loaders.postgres_loader import PostgresLoader
 from unittest.mock import patch, MagicMock
 
+# test de la classe DataAggregator
 class TestDataAggregator:
     def setup_method(self):
         self.aggregator = DataAggregator()
@@ -29,23 +31,52 @@ class TestDataAggregator:
     def test_transform(self):
         result = self.aggregator.transform(self.df, self.pays_df)
         assert len(result) == 2
-        assert 'id_pays' in result.columns
-        assert 'id_maladie' in result.columns  # Ensure id_maladie is present
-
+        assert 'id_pays' in result.columns # ce rassure que l'ID du pays est bien ajouté
+        assert 'id_maladie' in result.columns  # ce rassure que l'ID de la maladie est bien ajouté
+        
+# test de la classe DataCleaner
 class TestDataCleaner:
     def setup_method(self):
         self.cleaner = DataCleaner()
+        # Create a sample DataFrame with some edge cases
         self.df = pd.DataFrame({
-            'col1': [1, 2, None, 4, 5, 6, None],
-            'col2': [None, 2, 3, 4, 5, 6, None],
-            'col3': [None, None, None, None, 5, 6, None]
+            'Confirmed': [0, 100, 0, 50, 0],
+            'Deaths': [0, 10, 0, 5, 0],
+            'Recovered': [0, 90, 0, 45, 0],
+            'Active': [0, 0, 0, 0, 0],
+            'New cases': [0, 5, 0, 2, 0],
+            'New deaths': [0, 1, 0, 0, 0],
+            'New recovered': [0, 4, 0, 2, 0],
+            'Country': ['USA', 'Canada', '  france  ', 'Germany', 'Non renseigné'],
+            'Region': ['North America', 'North America', 'Europe', 'Europe', None]
         })
 
     def test_transform(self):
         result = self.cleaner.transform(self.df)
-        assert result['col1'].isnull().sum() == 0
-        assert result['col2'].isnull().sum() == 0
-        assert result['col3'].isnull().sum() == 0
+
+        # Assertions to verify the transformation
+        # 1. Rows with all numeric columns as 0 should be removed
+        assert len(result) == 3  # Only 3 rows should remain after removing rows with all zeros
+
+        # 2. Strings should be stripped and title-cased
+        assert result['Country'].tolist() == ['USA', 'Canada', 'France', 'Germany', 'Non Renseigné']
+
+        # 3. Negative values in numeric columns should be replaced with 0
+        assert (result.select_dtypes(include=['int64', 'float64']) >= 0).all().all()
+
+        # 4. Duplicates should be removed
+        assert result.duplicated().sum() == 0
+
+        # 5. Missing values in numeric columns should be filled with 0
+        assert result['Region'].isna().sum() == 0  # Missing values in text columns should be filled with 'Non renseigné'
+        assert result['Region'].tolist() == ['North America', 'North America', 'Europe', 'Europe', 'Non renseigné']
+
+        # 6. Missing values in text columns should be filled with 'Non renseigné'
+        assert result['Region'].isna().sum() == 0
+
+        # 7. Verify the output file is saved (optional, if you want to test file saving)
+        output_path = Path(__file__).parent.parent.parent / 'data' / 'processed' / 'cleaned_data.csv'
+        assert output_path.exists()
         
 class TestDataNormalizer:
     def setup_method(self):
