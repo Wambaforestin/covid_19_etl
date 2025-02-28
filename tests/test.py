@@ -7,7 +7,8 @@ from src.transformers.normalizer import DataNormalizer
 from src.loaders.postgres_loader import PostgresLoader
 from unittest.mock import patch, MagicMock
 
-# test de la classe DataAggregator
+
+# Test de la classe DataAggregator
 class TestDataAggregator:
     def setup_method(self):
         self.aggregator = DataAggregator()
@@ -31,14 +32,15 @@ class TestDataAggregator:
     def test_transform(self):
         result = self.aggregator.transform(self.df, self.pays_df)
         assert len(result) == 2
-        assert 'id_pays' in result.columns # ce rassure que l'ID du pays est bien ajouté
-        assert 'id_maladie' in result.columns  # ce rassure que l'ID de la maladie est bien ajouté
-        
-# test de la classe DataCleaner
+        assert 'id_pays' in result.columns  # Ensure the country ID is added
+        assert 'id_maladie' in result.columns  # Ensure the disease ID is added
+
+
+# Test de la classe DataCleaner
 class TestDataCleaner:
     def setup_method(self):
         self.cleaner = DataCleaner()
-        # Create a sample DataFrame with some edge cases
+        # Create a sample DataFrame with the expected columns
         self.df = pd.DataFrame({
             'Confirmed': [0, 100, 0, 50, 0],
             'Deaths': [0, 10, 0, 5, 0],
@@ -67,17 +69,16 @@ class TestDataCleaner:
         # 4. Duplicates should be removed
         assert result.duplicated().sum() == 0
 
-        # 5. Missing values in numeric columns should be filled with 0
-        assert result['Region'].isna().sum() == 0  # Missing values in text columns should be filled with 'Non renseigné'
+        # 5. Missing values in text columns should be filled with 'Non renseigné'
+        assert result['Region'].isna().sum() == 0
         assert result['Region'].tolist() == ['North America', 'North America', 'Europe', 'Europe', 'Non renseigné']
 
-        # 6. Missing values in text columns should be filled with 'Non renseigné'
-        assert result['Region'].isna().sum() == 0
-
-        # 7. Verify the output file is saved (optional, if you want to test file saving)
+        # 6. Verify the output file is saved (optional, if you want to test file saving)
         output_path = Path(__file__).parent.parent.parent / 'data' / 'processed' / 'cleaned_data.csv'
         assert output_path.exists()
-        
+
+
+# Test de la classe DataNormalizer
 class TestDataNormalizer:
     def setup_method(self):
         self.normalizer = DataNormalizer()
@@ -100,6 +101,8 @@ class TestDataNormalizer:
         assert 'cas_confirmes' in result.columns
         assert 'date_observation' in result.columns
 
+
+# Test de la classe PostgresLoader
 class TestPostgresLoader:
     @patch('src.config.db_manager.get_session')
     def test_bulk_insert(self, mock_get_session):
@@ -120,9 +123,17 @@ class TestPostgresLoader:
 
         mock_session = MagicMock()
         mock_get_session.return_value.__enter__.return_value = mock_session
+
+        # Mock the engine and connection
+        mock_engine = MagicMock()
+        mock_session.bind = mock_engine
+
         loader.bulk_insert('situation_pandemique', df)
 
-        # Ensure bulk insert is called correctly
-        assert mock_session.connection().execute.called or mock_session.add_all.called
-        
-        
+        # Verify that to_sql was called with the correct arguments
+        mock_engine.connect.return_value.__enter__.return_value.execute.assert_called_once()
+
+
+# Run the tests
+if __name__ == "__main__":
+    pytest.main()
