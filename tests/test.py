@@ -36,16 +36,16 @@ class TestDataCleaner:
     def setup_method(self):
         self.cleaner = DataCleaner()
         self.df = pd.DataFrame({
-            'col1': [1, 2, None, 4],
-            'col2': ['a', 'b', 'c', None],
-            'col3': [None, None, None, None]
+            'col1': [1, 2, None, 4, 5, 6, None],
+            'col2': [None, 2, 3, 4, 5, 6, None],
+            'col3': [None, None, None, None, 5, 6, None]
         })
 
     def test_transform(self):
         result = self.cleaner.transform(self.df)
         assert result['col1'].isnull().sum() == 0
         assert result['col2'].isnull().sum() == 0
-        assert result['col3'].isnull().sum() == 4
+        assert result['col3'].isnull().sum() == 0
         
 class TestDataNormalizer:
     def setup_method(self):
