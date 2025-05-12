@@ -18,7 +18,7 @@ class DataValidator:
 
     @staticmethod
     def validate_string(value, max_length=None):
-        if pd.isna(value):
+        if pd.isna(value): # isna est utilisé pour vérifier les valeurs manquantes
             return None
         value = str(value).strip()
         return value[:max_length] if max_length else value
